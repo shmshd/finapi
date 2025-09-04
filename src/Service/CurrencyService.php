@@ -15,8 +15,7 @@ final class CurrencyService
         private readonly string $date = "latest",
         private readonly bool $is_fallback = false
     )
-    {
-    }
+    {}
 
 //    public function getRate(string $baseCurrencyCode): string
 //    {
@@ -35,23 +34,30 @@ final class CurrencyService
         }
     }
 
-    public function getCurrentEndpoint(): string
+    public function getEndpoint($currencyCode): string
     {
-        $ev = self::ENDPOINT_VERSION;
+        return sprintf("%s/currencies/%s.min.json",
+            $this->getCurrentEndpointBase(), strtolower($currencyCode));
+    }
+
+    public function getCurrentEndpointBase(): string
+    {
         if (!$this->isDate($this->date)) {
             throw new \DateException();
         }
 
         return !$this->is_fallback ?
-            $this->getEndpoints()[0] :
-            $this->getEndpoints()[1];
+            $this->getEndpointBases()[0] :
+            $this->getEndpointBases()[1];
     }
 
-    public function getEndpoints(): array
+    public function getEndpointBases(): array
     {
         return [
-            sprintf('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@%s/%s', $this->date, self::ENDPOINT_VERSION),
-            sprintf('https://%s.currency-api.pages.dev/%s', $this->date, self::ENDPOINT_VERSION)
+            sprintf('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@%s/%s',
+                $this->date, self::ENDPOINT_VERSION),
+            sprintf('https://%s.currency-api.pages.dev/%s',
+                $this->date, self::ENDPOINT_VERSION)
         ];
     }
 
