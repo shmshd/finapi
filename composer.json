@@ -12,8 +12,10 @@
         "symfony/dotenv": "7.3.*",
         "symfony/flex": "^2.8.2",
         "symfony/framework-bundle": "7.3.*",
+        "symfony/intl": "7.3.*",
         "symfony/runtime": "7.3.*",
-        "symfony/yaml": "7.3.*"
+        "symfony/yaml": "7.3.*",
+        "terdia/currency-util": "^1.0"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.64"
