@@ -6,16 +6,22 @@ use Currency\Util\CurrencySymbolUtil;
 use DateTime;
 use InvalidArgumentException;
 use Symfony\Component\Intl\Currencies;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class CurrencyService
 {
     private const ENDPOINT_VERSION = 'v1';
+    private readonly string $fromCurrencyCode;
+    private readonly string $toCurrencyCode;
+    private readonly string $date;
 
     public function __construct(
-        private readonly string $date = "latest",
-        private readonly bool $is_fallback = false
+        private readonly HttpClientInterface $client,
+        private readonly bool $is_fallback = false,
     )
-    {}
+    {
+        $this->setDate();
+    }
 
 //    public function getRate(string $baseCurrencyCode): string
 //    {
@@ -25,7 +31,35 @@ final class CurrencyService
 //    {
 //    }
 
-    private function getCurrencySymbol($currencyCode): string
+    public function setDate(string $date = 'latest'): CurrencyService
+    {
+        if ($this->isDate($date)) {
+            $this->date = $date;
+        }
+
+        return $this;
+    }
+
+    public function setCurrencyCodes(string $fromCurrencyCode, string $toCurrencyCode): CurrencyService
+    {
+        $this->fromCurrencyCode = strtolower($fromCurrencyCode);
+        $this->toCurrencyCode = strtolower($toCurrencyCode);
+
+        return $this;
+    }
+
+    public function fetchRate(): float
+    {
+        $request = $this->client->request('GET', $this->getEndpoint($this->fromCurrencyCode));
+        return $request->toArray()[$this->fromCurrencyCode][$this->toCurrencyCode];
+    }
+
+    public function isFallback(): bool
+    {
+        return $this->is_fallback;
+    }
+
+    public function getCurrencySymbol($currencyCode): string
     {
         try {
             return CurrencySymbolUtil::getSymbol($currencyCode);
@@ -34,10 +68,10 @@ final class CurrencyService
         }
     }
 
-    public function getEndpoint($currencyCode): string
+    public function getEndpoint($fromCurrencyCode): string
     {
         return sprintf("%s/currencies/%s.min.json",
-            $this->getCurrentEndpointBase(), strtolower($currencyCode));
+            $this->getCurrentEndpointBase(), strtolower($fromCurrencyCode));
     }
 
     public function getCurrentEndpointBase(): string
@@ -63,8 +97,11 @@ final class CurrencyService
 
     private function isDate($date): bool
     {
-        $dt = DateTime::createFromFormat("Y-m-d", $date);
-        return $dt !== false && $dt::getLastErrors() === false;
+        if ($date !== 'latest') {
+            $dt = DateTime::createFromFormat("Y-m-d", $date);
+            return $dt !== false && $dt::getLastErrors() === false;
+        }
+        return true;
     }
 
 }

@@ -2,18 +2,24 @@
 
 namespace App\Controller;
 
+use App\Service\CurrencyService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[Route('/v1', name: 'currency_')]
+#[Route('/currency/v1', name: 'currency_')]
 final class CurrencyController extends AbstractController
 {
-    #[Route('/{code}', name: 'rate', methods: ['GET'])]
-    public function index(): JsonResponse
+    #[Route('/{fromCurrencyCode}/{toCurrencyCode}', name: 'rate', methods: ['GET'])]
+    public function index(HttpClientInterface $client, string $fromCurrencyCode, string $toCurrencyCode): JsonResponse
     {
+        $currency = (new CurrencyService(client: $client))
+            ->setCurrencyCodes($fromCurrencyCode, $toCurrencyCode);
+        $currency->fetchRate();
         return $this->json([
-            'message' => 'Hi'
+            'fallback' => $currency->isFallback(),
+            'message' => $currency->fetchRate()
         ]);
     }
 }
