@@ -10,7 +10,7 @@ services:
       - ./vendor:/var/www/html/vendor
 
   nginx:
-    image: nginx:alpine
+    image: nginx:stable-alpine-slim
     container_name: finapi-proxy
     ports:
       - "80:80"
