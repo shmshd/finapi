@@ -14,7 +14,7 @@ final class CurrencyController extends AbstractController
     #[Route('/{fromCurrencyCode}/{toCurrencyCode}', name: 'rate', methods: ['GET'])]
     public function index(HttpClientInterface $client, string $fromCurrencyCode, string $toCurrencyCode): JsonResponse
     {
-        $currency = (new CurrencyService(client: $client))
+        $currency = new CurrencyService(client: $client)
             ->setCurrencyCodes($fromCurrencyCode, $toCurrencyCode);
         $currency->fetchRate();
         return $this->json([

@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class CurrencyService
 {
-    private const ENDPOINT_VERSION = 'v1';
+    private const string ENDPOINT_VERSION = 'v1';
     private readonly string $fromCurrencyCode;
     private readonly string $toCurrencyCode;
     private readonly string $date;
