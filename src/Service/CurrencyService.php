@@ -11,6 +11,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CurrencyService
 {
     private const string ENDPOINT_VERSION = 'v1';
+    public const string DEFAULT_BASE_CURRENCY = 'usd';
     private readonly string $fromCurrencyCode;
     private readonly string $toCurrencyCode;
     private readonly string $date;
