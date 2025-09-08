@@ -12,7 +12,23 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CurrencyController extends AbstractController
 {
 
-    #[Route('/{toCurrencyCode}', name: 'rate_', methods: ['GET'])]
+    #[Route('/rates/{baseCurrency}', name: 'all_rates', methods: ['GET'])]
+    public function rates(
+        HttpClientInterface $client,
+        string $baseCurrency = CurrencyService::DEFAULT_BASE_CURRENCY
+    ): JsonResponse
+    {
+        $currency = new CurrencyService(client: $client)
+            ->setCurrencyCode($baseCurrency);
+        $rates = $currency->fetchRates();
+        return $this->json([
+            'fallback' => $currency->isFallback(),
+            'base' => $baseCurrency,
+            'rates' => $rates
+        ]);
+    }
+
+    #[Route('/rate/{toCurrencyCode}', name: 'rate_without_to_currency', methods: ['GET'])]
     public function withoutToCurrency(
         HttpClientInterface $client,
         string $toCurrencyCode
@@ -20,7 +36,7 @@ final class CurrencyController extends AbstractController
     {
         $baseCurrency = CurrencyService::DEFAULT_BASE_CURRENCY;
         $currency = new CurrencyService(client: $client)
-            ->setCurrencyCodes(CurrencyService::DEFAULT_BASE_CURRENCY, $toCurrencyCode);
+            ->setCurrencyCode(CurrencyService::DEFAULT_BASE_CURRENCY, $toCurrencyCode);
         $rate = $currency->fetchRate();
         return $this->json([
             'fallback' => $currency->isFallback(),
@@ -29,7 +45,7 @@ final class CurrencyController extends AbstractController
         ]);
     }
 
-    #[Route('/{fromCurrencyCode}/{toCurrencyCode}', name: 'rate', methods: ['GET'])]
+    #[Route('/rate/{fromCurrencyCode}/{toCurrencyCode}', name: 'rate_with_to_currency', methods: ['GET'])]
     public function withToCurrency(
         HttpClientInterface $client,
         string $fromCurrencyCode,
@@ -37,7 +53,7 @@ final class CurrencyController extends AbstractController
     ): JsonResponse
     {
         $currency = new CurrencyService(client: $client)
-            ->setCurrencyCodes($fromCurrencyCode, $toCurrencyCode);
+            ->setCurrencyCode($fromCurrencyCode, $toCurrencyCode);
         $rate = $currency->fetchRate();
         return $this->json([
             'fallback' => $currency->isFallback(),

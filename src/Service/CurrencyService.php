@@ -41,10 +41,12 @@ final class CurrencyService
         return $this;
     }
 
-    public function setCurrencyCodes(string $fromCurrencyCode, string $toCurrencyCode): CurrencyService
+    public function setCurrencyCode(string $fromCurrencyCode, ?string $toCurrencyCode = null): CurrencyService
     {
         $this->fromCurrencyCode = strtolower($fromCurrencyCode);
-        $this->toCurrencyCode = strtolower($toCurrencyCode);
+        if ($toCurrencyCode) {
+            $this->toCurrencyCode = strtolower($toCurrencyCode);
+        }
 
         return $this;
     }
@@ -53,6 +55,12 @@ final class CurrencyService
     {
         $request = $this->client->request('GET', $this->getEndpoint($this->fromCurrencyCode));
         return $request->toArray()[$this->fromCurrencyCode][$this->toCurrencyCode];
+    }
+
+    public function fetchRates(): array
+    {
+        $request = $this->client->request('GET', $this->getEndpoint($this->fromCurrencyCode));
+        return $request->toArray()[$this->fromCurrencyCode];
     }
 
     public function isFallback(): bool
