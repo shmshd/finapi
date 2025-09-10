@@ -17,6 +17,9 @@ RUN apk add --no-cache \
     && docker-php-ext-enable \
     opcache
 
+RUN apk add --no-cache \
+    chromium chromium-chromedriver
+
 COPY --from=composer/composer:2.8-bin /composer /usr/bin/composer
 
 WORKDIR /var/www/html
